@@ -1,8 +1,6 @@
 package togotime
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,42 +9,7 @@ import (
 
 var baseURL string = "https://www.toggl.com/api/v8/"
 
-func NewAPIClient(apiToken string) *APIClient {
-	apiClient := APIClient{
-		APIToken: apiToken,
-		http: HTTPHelper{
-			APIToken: apiToken,
-		},
-	}
-	userData := apiClient.getUserData()
-	apiClient.userData = userData
-	apiClient.SelfID = userData.Data.ID
-	return &apiClient
-}
-
-// APIClient is a class to allow high level interation with the toggl api
-type APIClient struct {
-	APIToken   string
-	http       HTTPHelper
-	SelfID     int64
-	userData   MeEndpoint
-	Workspaces []Workspace
-}
-
-func (c APIClient) getUserData() MeEndpoint {
-	endpoint := baseURL + "me"
-	raw := c.http.GetRawJSON(endpoint)
-	var userData MeEndpoint
-	json.Unmarshal(raw, &userData)
-	return userData
-}
-
-func (c APIClient) getWorkspaceClients() {
-	fmt.Println("hewwo")
-}
-
-// HTTPHelper A class to wrap http requests and functions for interaction with the
-// toggl api
+// HTTPHelper A class to wrap http requests and functions for interaction with the toggl api
 type HTTPHelper struct {
 	APIToken string
 }
@@ -60,6 +23,8 @@ func (h HTTPHelper) GetRawJSON(url string) []byte {
 	// TODO: Actually needs to do something about 400 codes
 	return raw
 }
+
+// makeRequest Makes a http request with the DefaultClient using a given made request and logs errors
 func (h HTTPHelper) makeRequest(req *http.Request) *http.Response {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -68,6 +33,7 @@ func (h HTTPHelper) makeRequest(req *http.Request) *http.Response {
 	return resp
 }
 
+// createRequest Creates a request and logs errors
 func (h HTTPHelper) createRequest(method string, url string) *http.Request {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
