@@ -25,6 +25,10 @@ func main() {
 	}
 
 	fmt.Printf("%+v\n", cfg)
-	h := togotime.NewAPIClient(cfg.APIToken)
-	fmt.Printf("%+v\n", h.Workspaces[0].Projects)
+	h, err := togotime.NewAPIClient(cfg.APIToken)
+	if err != nil {
+		fmt.Println(fmt.Errorf("%s", err))
+	} else {
+		fmt.Printf("%+v\n", h.Workspaces[0].Projects)
+	}
 }

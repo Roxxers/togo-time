@@ -1,6 +1,7 @@
 package togotime
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,17 +16,20 @@ type HTTPHelper struct {
 }
 
 // GetRawJSON A Wrapper for net/http requests to return byte array of json response
-func (h HTTPHelper) GetRawJSON(url string) []byte {
+func (h HTTPHelper) GetRawJSON(url string) ([]byte, error) {
 	req := h.createRequest("GET", url)
 	req.SetBasicAuth(h.APIToken, "api_token")
-	resp := h.makeRequest(req)
+	resp := h.MakeRequest(req)
+	if resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("Request failed with %d Status Code", resp.StatusCode)
+	}
 	raw := h.readBodyToBytes(resp.Body)
 	// TODO: Actually needs to do something about 400 codes
-	return raw
+	return raw, nil
 }
 
-// makeRequest Makes a http request with the DefaultClient using a given made request and logs errors
-func (h HTTPHelper) makeRequest(req *http.Request) *http.Response {
+// MakeRequest Makes a http request with the DefaultClient using a given made request and logs errors
+func (h HTTPHelper) MakeRequest(req *http.Request) *http.Response {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
